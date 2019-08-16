@@ -2,7 +2,11 @@
 
 namespace MadeiraMadeiraBr\HttpClient\Tests;
 
+use MadeiraMadeiraBr\Event\EventObserverFactory;
 use MadeiraMadeiraBr\HttpClient\Http\HttpClient;
+use MadeiraMadeiraBr\HttpClient\Http\IHttpResponse;
+use MadeiraMadeiraBr\HttpClient\Mock\MockHandler;
+use MadeiraMadeiraBr\HttpClient\Tests\Stub\Observer;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -55,5 +59,42 @@ class HttpClientTest extends TestCase
         $response = $httpClient->getLastResponse();
         $this->assertNotEmpty($response);
         $this->assertEquals(200, $response->getStatus());
+    }
+
+    public function testRequestMethod()
+    {
+        $httpClient = new HttpClient();
+        $response = $httpClient->request('POST', 'https://jsonplaceholder.typicode.com/posts', [
+            'title' => 'foo',
+            'body' => 'bar',
+            'userId' => 1
+        ]);
+
+        $this->assertInstanceOf(IHttpResponse::class, $response);
+    }
+
+    public function testSlowRequestEventObserver()
+    {
+        EventObserverFactory::getInstance()->addObserversToEvent('HTTP_CLIENT_SLOW_REQUEST_ALERT',
+            [
+                Observer::class
+            ]);
+
+        $httpClient = new HttpClient();
+        $httpClient->get('https://jsonplaceholder.typicode.com/posts/1', null, ['slowRequestTime' => 0.01]);
+
+        $this->assertIsArray(Observer::$eventResult);
+        $this->assertArrayHasKey('request', Observer::$eventResult);
+        $this->assertArrayHasKey('response', Observer::$eventResult);
+    }
+
+    public function testRequestMock()
+    {
+        MockHandler::add('GET', 'https://jsonplaceholder.typicode.com/posts', '{"test":"ok"}');
+        $response = (new HttpClient())->get('https://jsonplaceholder.typicode.com/posts');
+
+        $this->assertIsArray($response);
+        $this->assertArrayHasKey('test', $response);
+        $this->assertEquals('ok', $response['test']);
     }
 }

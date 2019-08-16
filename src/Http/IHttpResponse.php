@@ -22,6 +22,11 @@ interface IHttpResponse
     public function getBody(): ?string;
 
     /**
+     * @return HttpResponseTime
+     */
+    public function getTime(): HttpResponseTime;
+
+    /**
      * @return array
      */
     public function getDecodedBody(): ?array;

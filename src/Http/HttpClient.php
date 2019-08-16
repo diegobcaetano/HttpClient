@@ -4,6 +4,7 @@ namespace MadeiraMadeiraBr\HttpClient\Http;
 
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\IBodyHandler;
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\JsonBodyHandler;
+use MadeiraMadeiraBr\HttpClient\Mock\MockHandler;
 
 class HttpClient
 {
@@ -17,6 +18,7 @@ class HttpClient
      */
     private $headers = [
         'content-type' => 'application/json; charset=utf-8',
+        'connection'  => 'keep-alive'
     ];
 
     /**
@@ -90,19 +92,9 @@ class HttpClient
      */
     public function get(string $url, ?array $headers = null, ?array $options = null): ?array
     {
-        $this->lastTransaction = (new Transaction(
-            $this->buildRequest(
-                ITransaction::HTTP_METHOD_GET,
-                $this->getUrl($url, $options),
-                null,
-                $headers,
-                $options)));
-
-        $body = $this->lastTransaction->run()
-            ->getResponse()
+        return $this->request(ITransaction::HTTP_METHOD_GET, $url, null, $headers, $options)
             ->setBodyHandler($this->responseBodyHandler)
             ->getDecodedBody();
-        return $body;
     }
 
     /**
@@ -114,19 +106,9 @@ class HttpClient
      */
     public function post(string $url, array $body, ?array $headers = null, ?array $options = null): ?array
     {
-        $this->lastTransaction = (new Transaction(
-            $this->buildRequest(
-                ITransaction::HTTP_METHOD_POST,
-                $this->getUrl($url, $options),
-                $body,
-                $headers,
-                $options)));
-
-        $body = $this->lastTransaction->run()
-            ->getResponse()
+        return $this->request(ITransaction::HTTP_METHOD_POST, $url, $body, $headers, $options)
             ->setBodyHandler($this->responseBodyHandler)
             ->getDecodedBody();
-        return $body;
     }
 
     /**
@@ -138,19 +120,9 @@ class HttpClient
      */
     public function put(string $url, array $body, ?array $headers = null, ?array $options = null): ?array
     {
-        $this->lastTransaction = (new Transaction(
-            $this->buildRequest(
-                ITransaction::HTTP_METHOD_PUT,
-                $this->getUrl($url, $options),
-                $body,
-                $headers,
-                $options)));
-
-        $body = $this->lastTransaction->run()
-            ->getResponse()
+        return $this->request(ITransaction::HTTP_METHOD_PUT, $url, $body, $headers, $options)
             ->setBodyHandler($this->responseBodyHandler)
             ->getDecodedBody();
-        return $body;
     }
 
     /**
@@ -161,19 +133,34 @@ class HttpClient
      */
     public function delete(string $url, ?array $headers = null, ?array $options = null): ?array
     {
+        return $this->request(ITransaction::HTTP_METHOD_DELETE, $url, null, $headers, $options)
+            ->setBodyHandler($this->responseBodyHandler)
+            ->getDecodedBody();
+    }
+
+    public function request(
+        string $method,
+        string $url,
+        ?array $body = null,
+        ?array $headers = null,
+        ?array $options = null): IHttpResponse
+    {
+        $url = $this->getUrl($url, $options);
+        $mock = MockHandler::find($method, $url);
+
+        if($mock) {
+            return $mock->get();
+        }
+
         $this->lastTransaction = (new Transaction(
             $this->buildRequest(
-                ITransaction::HTTP_METHOD_DELETE,
+                $method,
                 $this->getUrl($url, $options),
-                null,
+                $body,
                 $headers,
                 $options)));
 
-        $body = $this->lastTransaction->run()
-            ->getResponse()
-            ->setBodyHandler($this->responseBodyHandler)
-            ->getDecodedBody();
-        return $body;
+        return $this->lastTransaction->run()->getResponse();
     }
 
     /**
@@ -226,6 +213,6 @@ class HttpClient
        if(isset($options['baseUrl'])) {
            return $options['baseUrl'] . $url;
        }
-       return $this->baseUrl . $url;
+       return rtrim($this->baseUrl . $url,"/");
     }
 }

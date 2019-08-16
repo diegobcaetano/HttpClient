@@ -22,15 +22,25 @@ class HttpResponse implements IHttpResponse
     private $body;
 
     /**
+     * @var HttpResponseTime
+     */
+    private $time;
+
+    /**
      * @var IBodyHandler
      */
     private $bodyHandler;
 
-    public function __construct(int $status, array $headers, string $body)
+    public function __construct(
+        int $status,
+        array $headers,
+        string $body,
+        HttpResponseTime $time)
     {
         $this->status = $status;
         $this->headers = $headers;
         $this->body = $body;
+        $this->time = $time;
     }
 
     /**
@@ -73,5 +83,13 @@ class HttpResponse implements IHttpResponse
     {
         $this->bodyHandler = $bodyHandler;
         return $this;
+    }
+
+    /**
+     * @return HttpResponseTime
+     */
+    public function getTime(): HttpResponseTime
+    {
+        return $this->time;
     }
 }

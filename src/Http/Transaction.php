@@ -25,7 +25,7 @@ class Transaction implements ITransaction
     {
         $ch = $this->prepare();
         $return = curl_exec($ch);
-        $this->response = (new CurlExtractor($ch, $return))->getResponse();
+        $this->response = (new CurlExtractor($ch, $return, $this->request))->getResponse();
         curl_close($ch);
         return $this;
     }

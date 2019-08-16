@@ -3,17 +3,21 @@
 namespace MadeiraMadeiraBr\HttpClient\Curl;
 
 use MadeiraMadeiraBr\HttpClient\Http\HttpResponse;
+use MadeiraMadeiraBr\HttpClient\Http\HttpResponseTime;
+use MadeiraMadeiraBr\HttpClient\Http\IHttpRequest;
 use MadeiraMadeiraBr\HttpClient\Http\IHttpResponse;
 
 class CurlExtractor
 {
     private $curlHandle;
     private $response;
+    private $request;
 
-    public function __construct($curlHandle, $response)
+    public function __construct($curlHandle, $response, IHttpRequest $request)
     {
         $this->curlHandle = $curlHandle;
         $this->response = $response;
+        $this->request = $request;
     }
 
     public function getResponse(): IHttpResponse
@@ -22,12 +26,51 @@ class CurlExtractor
         $headers = $this->extractHeaders();
         $body = $this->extractBody();
 
-        return (new HttpResponse($status, $headers, $body));
+        $totalTime = $this->extractTotalTime();
+        $nameLookup = $this->extractNameLookupTime();
+        $connection = $this->extractConnectionTime();
+        $handshake = $this->extractHandshakeTime();
+        $firstByteTime = $this->extractFirstByteTime();
+
+        $time = new HttpResponseTime($totalTime, $nameLookup, $connection, $handshake, $firstByteTime);
+        $response = (new HttpResponse($status, $headers, $body, $time));
+
+        $time->checkSlowRequest($this->request->getOptions()['slowRequestTime'] ?? null, [
+            'request' => $this->request,
+            'response' => $this->response
+        ]);
+
+        return $response;
     }
 
     private function extractStatus(): int
     {
         return intval(curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE));
+    }
+
+    private function extractTotalTime(): float
+    {
+        return curl_getinfo($this->curlHandle, CURLINFO_TOTAL_TIME);
+    }
+
+    private function extractNameLookupTime(): float
+    {
+        return curl_getinfo($this->curlHandle, CURLINFO_NAMELOOKUP_TIME);
+    }
+
+    private function extractConnectionTime(): float
+    {
+        return curl_getinfo($this->curlHandle, CURLINFO_CONNECT_TIME);
+    }
+
+    private function extractHandshakeTime(): float
+    {
+        return curl_getinfo($this->curlHandle, CURLINFO_APPCONNECT_TIME);
+    }
+
+    private function extractFirstByteTime(): float
+    {
+        return curl_getinfo($this->curlHandle, CURLINFO_STARTTRANSFER_TIME);
     }
 
     private function extractHeaders(): array
