@@ -170,7 +170,7 @@ class HttpClient
         $this->lastTransaction = (new Transaction(
             $this->buildRequest(
                 $method,
-                $this->getUrl($url, $options),
+                $url,
                 $body,
                 $headers,
                 $options)));
