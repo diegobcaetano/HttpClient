@@ -69,8 +69,15 @@ class HttpClient
      */
     public function setHeaders(array $headers): HttpClient
     {
-        array_change_key_case($headers, CASE_LOWER);
+        $headers = array_change_key_case($headers, CASE_LOWER);
         $this->headers = $headers;
+        return $this;
+    }
+
+    public function pushHeader(array $header)
+    {
+        $header = array_change_key_case($header, CASE_LOWER);
+        $this->headers = array_replace($this->headers, $header);
         return $this;
     }
 
