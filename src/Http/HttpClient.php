@@ -93,7 +93,7 @@ class HttpClient
     public function get(string $url, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_GET, $url, null, $headers, $options)
-            ->setBodyHandler($this->responseBodyHandler)
+            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
@@ -107,7 +107,7 @@ class HttpClient
     public function post(string $url, array $body, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_POST, $url, $body, $headers, $options)
-            ->setBodyHandler($this->responseBodyHandler)
+            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
@@ -121,7 +121,7 @@ class HttpClient
     public function put(string $url, array $body, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_PUT, $url, $body, $headers, $options)
-            ->setBodyHandler($this->responseBodyHandler)
+            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
@@ -134,7 +134,7 @@ class HttpClient
     public function delete(string $url, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_DELETE, $url, null, $headers, $options)
-            ->setBodyHandler($this->responseBodyHandler)
+            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
@@ -200,7 +200,7 @@ class HttpClient
             ->setHeaders($headers ?? $this->headers)
             ->setOptions($options ?? $this->options)
             ->setBody($body ?? [])
-            ->setBodyHandler($this->requestBodyHandler);
+            ->setBodyHandler($options['requestBodyHandler'] ??  $this->requestBodyHandler);
     }
 
     /**

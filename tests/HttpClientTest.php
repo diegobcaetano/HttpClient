@@ -5,6 +5,7 @@ namespace MadeiraMadeiraBr\HttpClient\Tests;
 use MadeiraMadeiraBr\Event\EventObserverFactory;
 use MadeiraMadeiraBr\HttpClient\Http\HttpClient;
 use MadeiraMadeiraBr\HttpClient\Http\IHttpResponse;
+use MadeiraMadeiraBr\HttpClient\Mock\Mock;
 use MadeiraMadeiraBr\HttpClient\Mock\MockHandler;
 use MadeiraMadeiraBr\HttpClient\Tests\Stub\Observer;
 use PHPUnit\Framework\TestCase;
@@ -88,9 +89,25 @@ class HttpClientTest extends TestCase
         $this->assertArrayHasKey('response', Observer::$eventResult);
     }
 
-    public function testRequestMock()
+    public function testRequestMockWithFile()
     {
-        MockHandler::add('GET', 'https://jsonplaceholder.typicode.com/posts', '{"test":"ok"}');
+        MockHandler::add(new Mock(
+            'GET',
+            'https://jsonplaceholder.typicode.com/posts',
+            __DIR__ .'/Stub/Response/sample.json'));
+        $response = (new HttpClient())->get('https://jsonplaceholder.typicode.com/posts');
+
+        $this->assertIsArray($response);
+        $this->assertArrayHasKey('test', $response);
+        $this->assertEquals('ok', $response['test']);
+    }
+
+    public function testRequestMockWithString()
+    {
+        MockHandler::add(new Mock(
+            'GET',
+            'https://jsonplaceholder.typicode.com/posts',
+            '{"test":"ok"}'));
         $response = (new HttpClient())->get('https://jsonplaceholder.typicode.com/posts');
 
         $this->assertIsArray($response);
