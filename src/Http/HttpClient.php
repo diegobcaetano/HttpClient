@@ -138,6 +138,14 @@ class HttpClient
             ->getDecodedBody();
     }
 
+    /**
+     * @param string $method
+     * @param string $url
+     * @param array|null $body
+     * @param array|null $headers
+     * @param array|null $options
+     * @return IHttpResponse
+     */
     public function request(
         string $method,
         string $url,
