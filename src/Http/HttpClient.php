@@ -230,4 +230,22 @@ class HttpClient
        }
        return rtrim($this->baseUrl . $url,"/");
     }
+
+    /**
+     * @return string
+     */
+    public function getBaseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
+    /**
+     * @param string $baseUrl
+     * @return HttpClient
+     */
+    public function setBaseUrl(string $baseUrl): HttpClient
+    {
+        $this->baseUrl = $baseUrl;
+        return $this;
+    }
 }
