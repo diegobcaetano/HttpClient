@@ -3,10 +3,14 @@
 namespace MadeiraMadeiraBr\HttpClient\Tests;
 
 use MadeiraMadeiraBr\Event\EventObserverFactory;
+use MadeiraMadeiraBr\HttpClient\BodyHandlers\JsonBodyHandler;
 use MadeiraMadeiraBr\HttpClient\Http\HttpClient;
+use MadeiraMadeiraBr\HttpClient\Http\HttpResponse;
+use MadeiraMadeiraBr\HttpClient\Http\HttpResponseTime;
 use MadeiraMadeiraBr\HttpClient\Http\IHttpResponse;
 use MadeiraMadeiraBr\HttpClient\Mock\Mock;
 use MadeiraMadeiraBr\HttpClient\Mock\MockHandler;
+use MadeiraMadeiraBr\HttpClient\ResponseQualityAssurance\ResponseQualityAssurance;
 use MadeiraMadeiraBr\HttpClient\Tests\Stub\Observer;
 use PHPUnit\Framework\TestCase;
 
@@ -113,5 +117,24 @@ class HttpClientTest extends TestCase
         $this->assertIsArray($response);
         $this->assertArrayHasKey('test', $response);
         $this->assertEquals('ok', $response['test']);
+    }
+
+    public function testResponseQualityAssurance()
+    {
+        EventObserverFactory::getInstance()->addObserversToEvent('HTTP_CLIENT_FALSE_POSITIVE_STATUS_ALERT',
+            [
+                Observer::class
+            ]);
+
+        $response = new HttpResponse(
+            200,
+            [],
+            'Content should be a valid JSON, but it is not',
+            new HttpResponseTime(0,0,0,0,0));
+        $response->setBodyHandler(new JsonBodyHandler());
+
+        (new ResponseQualityAssurance($response))->checkCompliance();
+
+        $this->assertInstanceOf(IHttpResponse::class, Observer::$eventResult);
     }
 }

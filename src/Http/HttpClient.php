@@ -5,6 +5,7 @@ namespace MadeiraMadeiraBr\HttpClient\Http;
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\IBodyHandler;
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\JsonBodyHandler;
 use MadeiraMadeiraBr\HttpClient\Mock\MockHandler;
+use MadeiraMadeiraBr\HttpClient\ResponseQualityAssurance\ResponseQualityAssurance;
 
 class HttpClient
 {
@@ -100,7 +101,6 @@ class HttpClient
     public function get(string $url, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_GET, $url, null, $headers, $options)
-            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
@@ -114,7 +114,6 @@ class HttpClient
     public function post(string $url, array $body, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_POST, $url, $body, $headers, $options)
-            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
@@ -128,7 +127,6 @@ class HttpClient
     public function put(string $url, array $body, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_PUT, $url, $body, $headers, $options)
-            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
@@ -141,7 +139,6 @@ class HttpClient
     public function delete(string $url, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_DELETE, $url, null, $headers, $options)
-            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
@@ -175,7 +172,10 @@ class HttpClient
                 $headers,
                 $options)));
 
-        return $this->lastTransaction->run()->getResponse();
+        $response = $this->lastTransaction->run()->getResponse();
+        $response->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler);
+        (new ResponseQualityAssurance($response))->checkCompliance();
+        return $response;
     }
 
     /**
