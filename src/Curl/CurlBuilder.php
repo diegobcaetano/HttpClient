@@ -30,7 +30,7 @@ abstract class CurlBuilder
     public function prepare()
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->request->getURL());
+        curl_setopt($ch, CURLOPT_URL, $this->request->getUrl());
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);

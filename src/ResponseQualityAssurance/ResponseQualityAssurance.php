@@ -21,6 +21,7 @@ class ResponseQualityAssurance
     public function checkCompliance()
     {
         $this->successStatusCompliance();
+        $this->responseStatusCompliance();
     }
 
     private function successStatusCompliance(): void
@@ -31,6 +32,14 @@ class ResponseQualityAssurance
         if(!$this->response->getDecodedBody()) {
             EventObserverFactory::getInstance()
                 ->dispatchEvent(EnvConfigInterface::FALSE_POSITIVE_STATUS_ALERT, $this->response);
+        }
+    }
+
+    private function responseStatusCompliance(): void
+    {
+        if(!in_array($this->response->getStatus(), [200])) {
+            EventObserverFactory::getInstance()
+                ->dispatchEvent(EnvConfigInterface::UNEXPECTED_RESPONSE_STATUS_ALERT, $this->response);
         }
     }
 }

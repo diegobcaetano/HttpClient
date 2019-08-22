@@ -7,6 +7,16 @@ use MadeiraMadeiraBr\HttpClient\BodyHandlers\IBodyHandler;
 interface IHttpResponse
 {
     /**
+     * @return string
+     */
+    public function getMethod(): ?string;
+
+    /**
+     * @return string
+     */
+    public function getUrl(): ?string;
+
+    /**
      * @return int
      */
     public function getStatus(): ?int;

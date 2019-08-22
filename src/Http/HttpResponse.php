@@ -7,17 +7,27 @@ use MadeiraMadeiraBr\HttpClient\BodyHandlers\IBodyHandler;
 class HttpResponse implements IHttpResponse
 {
     /**
-     * @var int
+     * @var string|null
+     */
+    private $method;
+
+    /**
+     * @var string|null
+     */
+    private $url;
+
+    /**
+     * @var int|null
      */
     private $status;
 
     /**
-     * @var array
+     * @var array|null
      */
     private $headers;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $body;
 
@@ -32,15 +42,35 @@ class HttpResponse implements IHttpResponse
     private $bodyHandler;
 
     public function __construct(
-        int $status,
-        array $headers,
-        string $body,
-        HttpResponseTime $time)
+        ?string $method = null,
+        ?string $url = null,
+        ?int $status = null,
+        ?array $headers = null,
+        ?string $body = null,
+        ?HttpResponseTime $time = null)
     {
+        $this->method = $method;
+        $this->url = $url;
         $this->status = $status;
         $this->headers = $headers;
         $this->body = $body;
-        $this->time = $time;
+        $this->time = $time ?? new HttpResponseTime(0,0,0,0,0);
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod(): ?string
+    {
+        return $this->method;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl(): ?string
+    {
+        return $this->url;
     }
 
     /**

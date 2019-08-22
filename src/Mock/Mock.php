@@ -60,6 +60,7 @@ class Mock
     public function get()
     {
         $response =  new HttpResponse(
+            $this->url,
             $this->status,
             [],
             $this->body,

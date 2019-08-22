@@ -4,7 +4,7 @@ namespace MadeiraMadeiraBr\HttpClient\Http;
 
 interface IHttpRequest
 {
-    public function getURL(): string;
+    public function getUrl(): string;
     public function getHeaders(): array;
     public function getMethod(): string;
     public function getOptions(): array;

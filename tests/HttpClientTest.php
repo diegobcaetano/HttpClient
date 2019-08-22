@@ -127,6 +127,7 @@ class HttpClientTest extends TestCase
             ]);
 
         $response = new HttpResponse(
+            'fake.com',
             200,
             [],
             'Content should be a valid JSON, but it is not',
