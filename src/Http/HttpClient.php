@@ -92,6 +92,18 @@ class HttpClient
         return $this;
     }
 
+    public function pushOptions(array $option): HttpClient
+    {
+        $curlSettings = $this->options['curlSettings'] ?? [];
+        if(isset($this->options['curlSettings'])
+            && isset($option['curlSettings']) && is_array($option['curlSettings'])) {
+            $curlSettings = array_replace($this->options['curlSettings'], $option['curlSettings']);
+        }
+        $this->options = array_replace($this->options, $option);
+        $this->options['curlSettings'] = $curlSettings;
+        return $this;
+    }
+
     /**
      * @param string $url
      * @param array|null $headers
