@@ -5,17 +5,24 @@ namespace MadeiraMadeiraBr\HttpClient\ResponseQualityAssurance;
 use MadeiraMadeiraBr\Event\EventObserverFactory;
 use MadeiraMadeiraBr\HttpClient\EnvConfigInterface;
 use MadeiraMadeiraBr\HttpClient\Http\IHttpResponse;
+use MadeiraMadeiraBr\HttpClient\Http\ITransaction;
 
 class ResponseQualityAssurance
 {
+    /**
+     * @return ITransaction
+     */
+    private $transaction;
+
     /**
      * @return IHttpResponse
      */
     private $response;
 
-    public function __construct(IHttpResponse $response)
+    public function __construct(ITransaction $transaction)
     {
-        $this->response = $response;
+        $this->transaction = $transaction;
+        $this->response = $transaction->getResponse();
     }
 
     public function checkCompliance()
@@ -32,7 +39,7 @@ class ResponseQualityAssurance
 
         if(!$this->response->getDecodedBody()) {
             EventObserverFactory::getInstance()
-                ->dispatchEvent(EnvConfigInterface::FALSE_POSITIVE_STATUS_ALERT, $this->response);
+                ->dispatchEvent(EnvConfigInterface::FALSE_POSITIVE_STATUS_ALERT, $this->transaction);
         }
     }
 
@@ -49,7 +56,7 @@ class ResponseQualityAssurance
 
         if($this->response->getTime()->getTotal() >= $slowRequestTime) {
             EventObserverFactory::getInstance()
-                ->dispatchEvent(EnvConfigInterface::SLOW_REQUEST_ALERT, $this->response);
+                ->dispatchEvent(EnvConfigInterface::SLOW_REQUEST_ALERT, $this->transaction);
         }
     }
 
@@ -62,7 +69,7 @@ class ResponseQualityAssurance
 
         if(in_array($this->response->getStatus(), $unexpectedStatus)) {
             EventObserverFactory::getInstance()
-                ->dispatchEvent(EnvConfigInterface::UNEXPECTED_RESPONSE_STATUS_ALERT, $this->response);
+                ->dispatchEvent(EnvConfigInterface::UNEXPECTED_RESPONSE_STATUS_ALERT, $this->transaction);
         }
     }
 }

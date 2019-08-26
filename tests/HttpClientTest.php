@@ -6,14 +6,18 @@ use MadeiraMadeiraBr\Event\EventObserverFactory;
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\JsonBodyHandler;
 use MadeiraMadeiraBr\HttpClient\EnvConfigInterface;
 use MadeiraMadeiraBr\HttpClient\Http\HttpClient;
+use MadeiraMadeiraBr\HttpClient\Http\HttpRequest;
 use MadeiraMadeiraBr\HttpClient\Http\HttpResponse;
 use MadeiraMadeiraBr\HttpClient\Http\HttpResponseTime;
 use MadeiraMadeiraBr\HttpClient\Http\IHttpResponse;
+use MadeiraMadeiraBr\HttpClient\Http\ITransaction;
+use MadeiraMadeiraBr\HttpClient\Http\Transaction;
 use MadeiraMadeiraBr\HttpClient\Mock\Mock;
 use MadeiraMadeiraBr\HttpClient\Mock\MockHandler;
 use MadeiraMadeiraBr\HttpClient\ResponseQualityAssurance\ResponseQualityAssurance;
 use MadeiraMadeiraBr\HttpClient\Tests\Stub\Observer;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 /**
  * @runTestsInSeparateProcesses
@@ -89,7 +93,7 @@ class HttpClientTest extends TestCase
         $httpClient = new HttpClient();
         $httpClient->get('https://jsonplaceholder.typicode.com/posts/1', null, ['slowRequestTime' => 0.01]);
 
-        $this->assertInstanceOf(IHttpResponse::class, Observer::$eventResult);
+        $this->assertInstanceOf(ITransaction::class, Observer::$eventResult);
     }
 
     public function testRequestMockWithFile()
@@ -136,9 +140,16 @@ class HttpClientTest extends TestCase
             new HttpResponseTime(0,0,0,0,0));
         $response->setBodyHandler(new JsonBodyHandler());
 
-        (new ResponseQualityAssurance($response))->checkCompliance();
+        $transaction = new Transaction(new HttpRequest());
+        $reflection = new ReflectionClass($transaction);
+        $responseProperty = $reflection->getProperty('response');
+        $responseProperty->setAccessible(true);
+        $responseProperty->setValue($transaction, $response);
+        $responseProperty->setAccessible(false);
 
-        $this->assertInstanceOf(IHttpResponse::class, Observer::$eventResult);
+        (new ResponseQualityAssurance($transaction))->checkCompliance();
+
+        $this->assertInstanceOf(ITransaction::class, Observer::$eventResult);
     }
 
     public function testResponseStatusCompliance()
@@ -159,8 +170,15 @@ class HttpClientTest extends TestCase
             new HttpResponseTime(0,0,0,0,0));
         $response->setBodyHandler(new JsonBodyHandler());
 
-        (new ResponseQualityAssurance($response))->checkCompliance();
+        $transaction = new Transaction(new HttpRequest());
+        $reflection = new ReflectionClass($transaction);
+        $responseProperty = $reflection->getProperty('response');
+        $responseProperty->setAccessible(true);
+        $responseProperty->setValue($transaction, $response);
+        $responseProperty->setAccessible(false);
 
-        $this->assertInstanceOf(IHttpResponse::class, Observer::$eventResult);
+        (new ResponseQualityAssurance($transaction))->checkCompliance();
+
+        $this->assertInstanceOf(ITransaction::class, Observer::$eventResult);
     }
 }

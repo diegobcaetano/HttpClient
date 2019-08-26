@@ -176,7 +176,7 @@ class HttpClient
 
         $response = $this->lastTransaction->run()->getResponse();
         $response->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler);
-        (new ResponseQualityAssurance($response))->checkCompliance();
+        (new ResponseQualityAssurance($this->lastTransaction))->checkCompliance();
         return $response;
     }
 
