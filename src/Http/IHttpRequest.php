@@ -2,7 +2,9 @@
 
 namespace MadeiraMadeiraBr\HttpClient\Http;
 
-interface IHttpRequest
+use MadeiraMadeiraBr\HttpClient\Printable;
+
+interface IHttpRequest extends Printable
 {
     public function getUrl(): string;
     public function getHeaders(): array;

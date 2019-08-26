@@ -3,8 +3,9 @@
 namespace MadeiraMadeiraBr\HttpClient\Http;
 
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\IBodyHandler;
+use MadeiraMadeiraBr\HttpClient\Printable;
 
-interface IHttpResponse
+interface IHttpResponse extends Printable
 {
     /**
      * @return string

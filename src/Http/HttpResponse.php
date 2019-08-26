@@ -137,4 +137,14 @@ class HttpResponse implements IHttpResponse
     {
         return $this->time;
     }
+
+    public function toArray(): array
+    {
+        return [
+            'status' => $this->getStatus(),
+            'headers' => $this->getHeaders(),
+            'time' => $this->getTime()->toArray(),
+            'body' => $this->getBody()
+        ];
+    }
 }
