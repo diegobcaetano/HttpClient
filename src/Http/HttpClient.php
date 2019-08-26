@@ -2,6 +2,8 @@
 
 namespace MadeiraMadeiraBr\HttpClient\Http;
 
+use MadeiraMadeiraBr\Event\EventObserverFactory;
+use MadeiraMadeiraBr\Event\EventObserverFactoryInterface;
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\IBodyHandler;
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\JsonBodyHandler;
 use MadeiraMadeiraBr\HttpClient\Mock\MockHandler;
@@ -247,5 +249,10 @@ class HttpClient
     {
         $this->baseUrl = $baseUrl;
         return $this;
+    }
+
+    public static function getEventHandlerInstance(): EventObserverFactoryInterface
+    {
+        return EventObserverFactory::getInstance();
     }
 }

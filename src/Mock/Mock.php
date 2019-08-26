@@ -60,8 +60,10 @@ class Mock
     public function get()
     {
         $response =  new HttpResponse(
+            $this->method,
             $this->url,
             $this->status,
+            [],
             [],
             $this->body,
             new HttpResponseTime(0, 0, 0, 0, 0));
@@ -101,7 +103,7 @@ class Mock
         return $this->body;
     }
 
-    private function setBodyContent(string $body)
+    private function setBodyContent(string $body): string
     {
         return @file_exists( $body )
             ? file_get_contents( $body )

@@ -4,6 +4,7 @@ namespace MadeiraMadeiraBr\HttpClient\Tests;
 
 use MadeiraMadeiraBr\Event\EventObserverFactory;
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\JsonBodyHandler;
+use MadeiraMadeiraBr\HttpClient\EnvConfigInterface;
 use MadeiraMadeiraBr\HttpClient\Http\HttpClient;
 use MadeiraMadeiraBr\HttpClient\Http\HttpResponse;
 use MadeiraMadeiraBr\HttpClient\Http\HttpResponseTime;
@@ -88,9 +89,7 @@ class HttpClientTest extends TestCase
         $httpClient = new HttpClient();
         $httpClient->get('https://jsonplaceholder.typicode.com/posts/1', null, ['slowRequestTime' => 0.01]);
 
-        $this->assertIsArray(Observer::$eventResult);
-        $this->assertArrayHasKey('request', Observer::$eventResult);
-        $this->assertArrayHasKey('response', Observer::$eventResult);
+        $this->assertInstanceOf(IHttpResponse::class, Observer::$eventResult);
     }
 
     public function testRequestMockWithFile()
@@ -119,18 +118,44 @@ class HttpClientTest extends TestCase
         $this->assertEquals('ok', $response['test']);
     }
 
-    public function testResponseQualityAssurance()
+    public function testResponseFalsePositiveCompliance()
     {
-        EventObserverFactory::getInstance()->addObserversToEvent('HTTP_CLIENT_FALSE_POSITIVE_STATUS_ALERT',
+        EventObserverFactory::getInstance()->addObserversToEvent(
+            'HTTP_CLIENT_FALSE_POSITIVE_STATUS_ALERT',
             [
                 Observer::class
             ]);
 
         $response = new HttpResponse(
+            'GET',
             'fake.com',
             200,
             [],
+            [],
             'Content should be a valid JSON, but it is not',
+            new HttpResponseTime(0,0,0,0,0));
+        $response->setBodyHandler(new JsonBodyHandler());
+
+        (new ResponseQualityAssurance($response))->checkCompliance();
+
+        $this->assertInstanceOf(IHttpResponse::class, Observer::$eventResult);
+    }
+
+    public function testResponseStatusCompliance()
+    {
+        EventObserverFactory::getInstance()->addObserversToEvent(
+            EnvConfigInterface::UNEXPECTED_RESPONSE_STATUS_ALERT,
+            [
+                Observer::class
+            ]);
+
+        $response = new HttpResponse(
+            'POST',
+            'fake.com',
+            500,
+            [],
+            ['unexpectedStatus' => [400, 500, 502]],
+            'blabla',
             new HttpResponseTime(0,0,0,0,0));
         $response->setBodyHandler(new JsonBodyHandler());
 

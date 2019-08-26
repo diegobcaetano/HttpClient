@@ -2,8 +2,6 @@
 
 namespace MadeiraMadeiraBr\HttpClient\Http;
 
-use MadeiraMadeiraBr\Event\EventObserverFactory;
-use MadeiraMadeiraBr\HttpClient\EnvConfigInterface;
 use MadeiraMadeiraBr\HttpClient\Printable;
 
 class HttpResponseTime implements Printable
@@ -85,17 +83,6 @@ class HttpResponseTime implements Printable
     public function getFirstByte(): ?float
     {
         return $this->firstByte;
-    }
-
-    public function checkSlowRequest(?float $slowRequestTime = null, ?array $eventInformation = [])
-    {
-        $slowRequestTime = $slowRequestTime ?? getenv(EnvConfigInterface::SLOW_REQUEST_ALERT);
-        if(!$slowRequestTime) return;
-
-        if($this->getTotal() >= $slowRequestTime) {
-            EventObserverFactory::getInstance()
-                ->dispatchEvent(EnvConfigInterface::SLOW_REQUEST_ALERT, $eventInformation);
-        }
     }
 
     public function toArray(): array

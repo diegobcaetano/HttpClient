@@ -22,9 +22,14 @@ class HttpResponse implements IHttpResponse
     private $status;
 
     /**
-     * @var array|null
+     * @var array
      */
     private $headers;
+
+    /**
+     * @var array
+     */
+    private $options;
 
     /**
      * @var string|null
@@ -46,13 +51,15 @@ class HttpResponse implements IHttpResponse
         ?string $url = null,
         ?int $status = null,
         ?array $headers = null,
+        ?array $options = null,
         ?string $body = null,
         ?HttpResponseTime $time = null)
     {
         $this->method = $method;
         $this->url = $url;
         $this->status = $status;
-        $this->headers = $headers;
+        $this->headers = $headers ?? [];
+        $this->options = $options ?? [];
         $this->body = $body;
         $this->time = $time ?? new HttpResponseTime(0,0,0,0,0);
     }
@@ -84,9 +91,17 @@ class HttpResponse implements IHttpResponse
     /**
      * @return array
      */
-    public function getHeaders(): ?array
+    public function getHeaders(): array
     {
         return $this->headers;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
     }
 
     /**

@@ -35,12 +35,7 @@ class CurlExtractor
         $firstByteTime = $this->extractFirstByteTime();
 
         $time = new HttpResponseTime($totalTime, $nameLookup, $connection, $handshake, $firstByteTime);
-        $response = (new HttpResponse($method, $url, $status, $headers, $body, $time));
-
-        $time->checkSlowRequest($this->request->getOptions()['slowRequestTime'] ?? null, [
-            'request' => $this->request,
-            'response' => $this->response
-        ]);
+        $response = (new HttpResponse($method, $url, $status, $headers, $this->request->getOptions(), $body, $time));
 
         return $response;
     }
