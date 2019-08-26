@@ -92,7 +92,7 @@ class HttpClient
         return $this;
     }
 
-    public function pushOptions(array $option): HttpClient
+    public function pushOption(array $option): HttpClient
     {
         $curlSettings = $this->options['curlSettings'] ?? [];
         if(isset($this->options['curlSettings'])
