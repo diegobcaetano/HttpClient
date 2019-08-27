@@ -13,6 +13,8 @@ abstract class CurlBuilder
         CURLOPT_DNS_CACHE_TIMEOUT => true,
         CURLOPT_HTTP_VERSION => true,
         CURLOPT_MAXCONNECTS => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_POSTREDIR => true,
         CURLOPT_TIMEOUT => true,
         CURLOPT_TIMEOUT_MS => true,
         CURLOPT_COOKIE => true,
