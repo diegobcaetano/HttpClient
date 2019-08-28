@@ -227,7 +227,9 @@ class HttpClient
             ->setHeaders($headers ?? $this->headers)
             ->setOptions($options ?? $this->options)
             ->setBody($body ?? [])
-            ->setBodyHandler($options['requestBodyHandler'] ??  $this->requestBodyHandler);
+            ->setBodyHandler($options['requestBodyHandler']
+                ?? $this->options['requestBodyHandler']
+                ??  $this->requestBodyHandler);
     }
 
     /**

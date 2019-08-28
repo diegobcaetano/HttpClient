@@ -1,8 +1,7 @@
 # HttpClient
 
 ### Description
-This package provides a simple way to make http(s) request.
-It supports mocks.
+HttpClient is a PHP HTTP client that makes it easy to send HTTP requests and integrate with web services.
 
 ### Installation
 
@@ -16,6 +15,20 @@ composer require madeiramadeirabr/http-client
 ```
 
 ## Usage
+
+#### Get
+
+```
+$client = new HttpClient();
+$responseBody = $client->get('https://jsonplaceholder.typicode.com/posts');
+```
+
+#### Post
+
+```
+$client = new HttpClient();
+$responseBody = $client->post('https://jsonplaceholder.typicode.com/posts');
+```
 
 This package works based on environment settings. Below is a reference table:
 
