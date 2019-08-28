@@ -48,6 +48,11 @@ interface IHttpResponse extends Printable
     public function getDecodedBody(): ?array;
 
     /**
+     * @return int|null
+     */
+    public function getErrorCode(): ?int;
+
+    /**
      * @param IBodyHandler $bodyHandler
      * @return IHttpResponse
      */

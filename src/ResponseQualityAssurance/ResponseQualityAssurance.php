@@ -30,6 +30,7 @@ class ResponseQualityAssurance
         $this->successStatusCompliance();
         $this->responseStatusCompliance();
         $this->slowRequestCompliance();
+        $this->responseCurlErrorCompliance();
     }
 
     private function successStatusCompliance(): void
@@ -71,5 +72,13 @@ class ResponseQualityAssurance
             EventObserverFactory::getInstance()
                 ->dispatchEvent(EnvConfigInterface::UNEXPECTED_RESPONSE_STATUS_ALERT, $this->transaction);
         }
+    }
+
+    private function responseCurlErrorCompliance(): void
+    {
+        if(!$this->response->getErrorCode()) return;
+
+        EventObserverFactory::getInstance()
+            ->dispatchEvent(EnvConfigInterface::CURL_ERROR, $this->transaction);
     }
 }

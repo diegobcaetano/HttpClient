@@ -181,4 +181,19 @@ class HttpClientTest extends TestCase
 
         $this->assertInstanceOf(ITransaction::class, Observer::$eventResult);
     }
+
+    public function testCurlErrorCompliance()
+    {
+        EventObserverFactory::getInstance()->addObserversToEvent('HTTP_CLIENT_CURL_ERROR',
+            [
+                Observer::class
+            ]);
+
+        $httpClient = new HttpClient();
+        $httpClient->get('https://jsonplaceholder.typicode.com/posts/1',
+            null,
+            ['curlSettings' => [CURLOPT_TIMEOUT_MS => 10]]);
+
+        $this->assertInstanceOf(ITransaction::class, Observer::$eventResult);
+    }
 }

@@ -46,6 +46,11 @@ class HttpResponse implements IHttpResponse
      */
     private $bodyHandler;
 
+    /**
+     * @var int|null
+     */
+    private $errorCode;
+
     public function __construct(
         ?string $method = null,
         ?string $url = null,
@@ -144,7 +149,26 @@ class HttpResponse implements IHttpResponse
             'status' => $this->getStatus(),
             'headers' => $this->getHeaders(),
             'time' => $this->getTime()->toArray(),
-            'body' => $this->getBody()
+            'body' => $this->getBody(),
+            'errorCode' => $this->getErrorCode()
         ];
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getErrorCode(): ?int
+    {
+        return $this->errorCode;
+    }
+
+    /**
+     * @param int|null $errorCode
+     * @return HttpResponse
+     */
+    public function setErrorCode(?int $errorCode): HttpResponse
+    {
+        $this->errorCode = $errorCode;
+        return $this;
     }
 }

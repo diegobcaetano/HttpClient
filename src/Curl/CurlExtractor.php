@@ -37,7 +37,18 @@ class CurlExtractor
         $time = new HttpResponseTime($totalTime, $nameLookup, $connection, $handshake, $firstByteTime);
         $response = (new HttpResponse($method, $url, $status, $headers, $this->request->getOptions(), $body, $time));
 
+        $errorCode = $this->extractCurlErrorNumber();
+
+        if($errorCode) {
+            $response->setErrorCode($errorCode);
+        }
+
         return $response;
+    }
+
+    private function extractCurlErrorNumber(): ?int
+    {
+        return curl_errno($this->curlHandle);
     }
 
     private function extractStatus(): ?int
