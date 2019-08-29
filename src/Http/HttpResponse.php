@@ -3,6 +3,7 @@
 namespace MadeiraMadeiraBr\HttpClient\Http;
 
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\IBodyHandler;
+use MadeiraMadeiraBr\HttpClient\IError;
 
 class HttpResponse implements IHttpResponse
 {
@@ -47,9 +48,9 @@ class HttpResponse implements IHttpResponse
     private $bodyHandler;
 
     /**
-     * @var int|null
+     * @var IError|null
      */
-    private $errorCode;
+    private $error;
 
     public function __construct(
         ?string $method = null,
@@ -143,6 +144,17 @@ class HttpResponse implements IHttpResponse
         return $this->time;
     }
 
+    public function setError(IError $error): IHttpResponse
+    {
+        $this->error = $error;
+        return $this;
+    }
+
+    public function getError(): ?IError
+    {
+        return $this->error;
+    }
+
     public function toArray(): array
     {
         return [
@@ -150,25 +162,7 @@ class HttpResponse implements IHttpResponse
             'headers' => $this->getHeaders(),
             'time' => $this->getTime()->toArray(),
             'body' => $this->getBody(),
-            'errorCode' => $this->getErrorCode()
+            'error' => $this->getError() ? $this->getError()->toArray() : null
         ];
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getErrorCode(): ?int
-    {
-        return $this->errorCode;
-    }
-
-    /**
-     * @param int|null $errorCode
-     * @return HttpResponse
-     */
-    public function setErrorCode(?int $errorCode): HttpResponse
-    {
-        $this->errorCode = $errorCode;
-        return $this;
     }
 }

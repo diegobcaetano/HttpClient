@@ -38,7 +38,7 @@ class ResponseQualityAssurance
         if($this->response->getStatus() != 200) return;
         if(!strlen($this->response->getBody())) return;
 
-        if(!$this->response->getDecodedBody()) {
+        if(is_null($this->response->getDecodedBody())) {
             EventObserverFactory::getInstance()
                 ->dispatchEvent(EnvConfigInterface::FALSE_POSITIVE_STATUS_ALERT, $this->transaction);
         }
@@ -76,7 +76,7 @@ class ResponseQualityAssurance
 
     private function responseCurlErrorCompliance(): void
     {
-        if(!$this->response->getErrorCode()) return;
+        if(!$this->response->getError()) return;
 
         EventObserverFactory::getInstance()
             ->dispatchEvent(EnvConfigInterface::CURL_ERROR, $this->transaction);

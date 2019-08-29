@@ -3,6 +3,7 @@
 namespace MadeiraMadeiraBr\HttpClient\Http;
 
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\IBodyHandler;
+use MadeiraMadeiraBr\HttpClient\IError;
 use MadeiraMadeiraBr\HttpClient\Printable;
 
 interface IHttpResponse extends Printable
@@ -48,9 +49,15 @@ interface IHttpResponse extends Printable
     public function getDecodedBody(): ?array;
 
     /**
-     * @return int|null
+     * @param IError $error
+     * @return IHttpResponse
      */
-    public function getErrorCode(): ?int;
+    public function setError(IError $error): IHttpResponse;
+
+    /**
+     * @return IError
+     */
+    public function getError(): ?IError;
 
     /**
      * @param IBodyHandler $bodyHandler

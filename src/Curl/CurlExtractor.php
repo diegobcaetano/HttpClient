@@ -40,15 +40,21 @@ class CurlExtractor
         $errorCode = $this->extractCurlErrorNumber();
 
         if($errorCode) {
-            $response->setErrorCode($errorCode);
+            $error = new Error($errorCode, $this->extractCurlErrorDescription());
+            $response->setError($error);
         }
 
         return $response;
     }
 
-    private function extractCurlErrorNumber(): ?int
+    private function extractCurlErrorNumber(): int
     {
         return curl_errno($this->curlHandle);
+    }
+
+    private function extractCurlErrorDescription(): string
+    {
+        return curl_error($this->curlHandle);
     }
 
     private function extractStatus(): ?int
