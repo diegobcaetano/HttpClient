@@ -17,17 +17,35 @@ composer require madeiramadeirabr/http-client
 ## Usage
 
 #### Get
-
+**Parameters:**
+  - string **$url**: address to be called
+  - (optional) array **$headers**: the headers of the request (eg: ['cache-control' => 'no-cache'])
+  - (optional) array **$options**: configuration of some properties of the request ([see options here](#filesystem))
+    
+**Return:** array
 ```
 $client = new HttpClient();
 $responseBody = $client->get('https://jsonplaceholder.typicode.com/posts');
 ```
 
 #### Post
+**Return:** array
+```
+$client = new HttpClient();
+$responseBody = $client->post('https://jsonplaceholder.typicode.com/posts', [
+    'title' => 'foo',
+    'body' => 'bar',
+    'userId' => 1
+]);
+```
+
+#### Put
 
 ```
 $client = new HttpClient();
-$responseBody = $client->post('https://jsonplaceholder.typicode.com/posts');
+$responseBody = $client->put('https://jsonplaceholder.typicode.com/posts', [
+    'title' => 'foobar'
+]);
 ```
 
 This package works based on environment settings. Below is a reference table:

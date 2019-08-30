@@ -63,12 +63,15 @@ class ResponseQualityAssurance
 
     private function responseStatusCompliance(): void
     {
+        $status = $this->response->getStatus();
+        $statusWhitelist = $this->response->getOptions()['responseStatusWhitelist'] ?? [];
         $unexpectedStatus = isset($this->response->getOptions()['unexpectedStatus'])
             ? $this->response->getOptions()['unexpectedStatus']
             : array_filter(explode('|',
                 getenv(EnvConfigInterface::UNEXPECTED_RESPONSE_STATUS_ALERT)));
 
-        if(in_array($this->response->getStatus(), $unexpectedStatus)) {
+
+        if(in_array($status, $unexpectedStatus) && !in_array($status, $statusWhitelist)) {
             EventObserverFactory::getInstance()
                 ->dispatchEvent(EnvConfigInterface::UNEXPECTED_RESPONSE_STATUS_ALERT, $this->transaction);
         }
