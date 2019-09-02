@@ -82,6 +82,6 @@ class ResponseQualityAssurance
         if(!$this->response->getError()) return;
 
         EventObserverFactory::getInstance()
-            ->dispatchEvent(EnvConfigInterface::CURL_ERROR, $this->transaction);
+            ->dispatchEvent(EnvConfigInterface::CURL_ERROR_ALERT, $this->transaction);
     }
 }
