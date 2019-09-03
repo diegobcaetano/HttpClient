@@ -22,6 +22,8 @@ class CurlExtractor
 
     public function getResponse(): IHttpResponse
     {
+        $method = $this->request->getMethod();
+        $url = $this->request->getUrl();
         $status = $this->extractStatus();
         $headers = $this->extractHeaders();
         $body = $this->extractBody();
@@ -33,42 +35,54 @@ class CurlExtractor
         $firstByteTime = $this->extractFirstByteTime();
 
         $time = new HttpResponseTime($totalTime, $nameLookup, $connection, $handshake, $firstByteTime);
-        $response = (new HttpResponse($status, $headers, $body, $time));
+        $response = (new HttpResponse($method, $url, $status, $headers, $this->request->getOptions(), $body, $time));
 
-        $time->checkSlowRequest($this->request->getOptions()['slowRequestTime'] ?? null, [
-            'request' => $this->request,
-            'response' => $this->response
-        ]);
+        $errorCode = $this->extractCurlErrorNumber();
+
+        if($errorCode) {
+            $error = new Error($errorCode, $this->extractCurlErrorDescription());
+            $response->setError($error);
+        }
 
         return $response;
     }
 
-    private function extractStatus(): int
+    private function extractCurlErrorNumber(): int
+    {
+        return curl_errno($this->curlHandle);
+    }
+
+    private function extractCurlErrorDescription(): string
+    {
+        return curl_error($this->curlHandle);
+    }
+
+    private function extractStatus(): ?int
     {
         return intval(curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE));
     }
 
-    private function extractTotalTime(): float
+    private function extractTotalTime(): ?float
     {
         return curl_getinfo($this->curlHandle, CURLINFO_TOTAL_TIME);
     }
 
-    private function extractNameLookupTime(): float
+    private function extractNameLookupTime(): ?float
     {
         return curl_getinfo($this->curlHandle, CURLINFO_NAMELOOKUP_TIME);
     }
 
-    private function extractConnectionTime(): float
+    private function extractConnectionTime(): ?float
     {
         return curl_getinfo($this->curlHandle, CURLINFO_CONNECT_TIME);
     }
 
-    private function extractHandshakeTime(): float
+    private function extractHandshakeTime(): ?float
     {
         return curl_getinfo($this->curlHandle, CURLINFO_APPCONNECT_TIME);
     }
 
-    private function extractFirstByteTime(): float
+    private function extractFirstByteTime(): ?float
     {
         return curl_getinfo($this->curlHandle, CURLINFO_STARTTRANSFER_TIME);
     }
@@ -89,12 +103,12 @@ class CurlExtractor
         return $headers;
     }
 
-    private function extractHeaderSize(): int
+    private function extractHeaderSize(): ?int
     {
         return curl_getinfo($this->curlHandle, CURLINFO_HEADER_SIZE);
     }
 
-    private function extractBody(): string
+    private function extractBody(): ?string
     {
         return substr($this->response, $this->extractHeaderSize());
     }

@@ -140,4 +140,15 @@ class HttpRequest implements IHttpRequest
         $this->bodyHandler = $bodyHandler;
         return $this;
     }
+
+    public function toArray(): array
+    {
+        return [
+            'method' => $this->getMethod(),
+            'url' => $this->getUrl(),
+            'headers' => $this->getHeaders(),
+            'options' => $this->getOptions(),
+            'body' => $this->getBody()
+        ];
+    }
 }

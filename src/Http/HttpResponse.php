@@ -3,11 +3,22 @@
 namespace MadeiraMadeiraBr\HttpClient\Http;
 
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\IBodyHandler;
+use MadeiraMadeiraBr\HttpClient\IError;
 
 class HttpResponse implements IHttpResponse
 {
     /**
-     * @var int
+     * @var string|null
+     */
+    private $method;
+
+    /**
+     * @var string|null
+     */
+    private $url;
+
+    /**
+     * @var int|null
      */
     private $status;
 
@@ -17,7 +28,12 @@ class HttpResponse implements IHttpResponse
     private $headers;
 
     /**
-     * @var string
+     * @var array
+     */
+    private $options;
+
+    /**
+     * @var string|null
      */
     private $body;
 
@@ -31,16 +47,43 @@ class HttpResponse implements IHttpResponse
      */
     private $bodyHandler;
 
+    /**
+     * @var IError|null
+     */
+    private $error;
+
     public function __construct(
-        int $status,
-        array $headers,
-        string $body,
-        HttpResponseTime $time)
+        ?string $method = null,
+        ?string $url = null,
+        ?int $status = null,
+        ?array $headers = null,
+        ?array $options = null,
+        ?string $body = null,
+        ?HttpResponseTime $time = null)
     {
+        $this->method = $method;
+        $this->url = $url;
         $this->status = $status;
-        $this->headers = $headers;
+        $this->headers = $headers ?? [];
+        $this->options = $options ?? [];
         $this->body = $body;
-        $this->time = $time;
+        $this->time = $time ?? new HttpResponseTime(0,0,0,0,0);
+    }
+
+    /**
+     * @return string
+     */
+    public function getMethod(): ?string
+    {
+        return $this->method;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl(): ?string
+    {
+        return $this->url;
     }
 
     /**
@@ -54,9 +97,17 @@ class HttpResponse implements IHttpResponse
     /**
      * @return array
      */
-    public function getHeaders(): ?array
+    public function getHeaders(): array
     {
         return $this->headers;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
     }
 
     /**
@@ -91,5 +142,27 @@ class HttpResponse implements IHttpResponse
     public function getTime(): HttpResponseTime
     {
         return $this->time;
+    }
+
+    public function setError(IError $error): IHttpResponse
+    {
+        $this->error = $error;
+        return $this;
+    }
+
+    public function getError(): ?IError
+    {
+        return $this->error;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'status' => $this->getStatus(),
+            'headers' => $this->getHeaders(),
+            'time' => $this->getTime()->toArray(),
+            'body' => $this->getBody(),
+            'error' => $this->getError() ? $this->getError()->toArray() : null
+        ];
     }
 }

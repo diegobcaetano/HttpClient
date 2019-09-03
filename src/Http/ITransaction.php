@@ -2,7 +2,9 @@
 
 namespace MadeiraMadeiraBr\HttpClient\Http;
 
-interface ITransaction
+use MadeiraMadeiraBr\HttpClient\Printable;
+
+interface ITransaction extends Printable
 {
     const HTTP_METHOD_GET = 'GET';
     const HTTP_METHOD_POST = 'POST';
@@ -11,4 +13,5 @@ interface ITransaction
 
     public function run(): ITransaction;
     public function getResponse(): IHttpResponse;
+    public function getRequest(): IHttpRequest;
 }

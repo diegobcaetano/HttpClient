@@ -45,4 +45,17 @@ class Transaction implements ITransaction
     {
         return $this->response;
     }
+
+    public function getRequest(): IHttpRequest
+    {
+        return $this->request;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'request' => $this->getRequest()->toArray(),
+            'response' => $this->getResponse()->toArray()
+        ];
+    }
 }

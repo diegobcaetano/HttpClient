@@ -5,6 +5,7 @@ namespace MadeiraMadeiraBr\HttpClient\Http;
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\IBodyHandler;
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\JsonBodyHandler;
 use MadeiraMadeiraBr\HttpClient\Mock\MockHandler;
+use MadeiraMadeiraBr\HttpClient\ResponseQualityAssurance\ResponseQualityAssurance;
 
 class HttpClient
 {
@@ -69,8 +70,15 @@ class HttpClient
      */
     public function setHeaders(array $headers): HttpClient
     {
-        array_change_key_case($headers, CASE_LOWER);
+        $headers = array_change_key_case($headers, CASE_LOWER);
         $this->headers = $headers;
+        return $this;
+    }
+
+    public function pushHeader(array $header)
+    {
+        $header = array_change_key_case($header, CASE_LOWER);
+        $this->headers = array_replace($this->headers, $header);
         return $this;
     }
 
@@ -84,6 +92,18 @@ class HttpClient
         return $this;
     }
 
+    public function pushOption(array $option): HttpClient
+    {
+        $curlSettings = $this->options['curlSettings'] ?? [];
+        if(isset($this->options['curlSettings'])
+            && isset($option['curlSettings']) && is_array($option['curlSettings'])) {
+            $curlSettings = array_replace($this->options['curlSettings'], $option['curlSettings']);
+        }
+        $this->options = array_replace($this->options, $option);
+        $this->options['curlSettings'] = $curlSettings;
+        return $this;
+    }
+
     /**
      * @param string $url
      * @param array|null $headers
@@ -93,7 +113,6 @@ class HttpClient
     public function get(string $url, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_GET, $url, null, $headers, $options)
-            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
@@ -107,7 +126,6 @@ class HttpClient
     public function post(string $url, array $body, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_POST, $url, $body, $headers, $options)
-            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
@@ -121,7 +139,6 @@ class HttpClient
     public function put(string $url, array $body, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_PUT, $url, $body, $headers, $options)
-            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
@@ -134,10 +151,17 @@ class HttpClient
     public function delete(string $url, ?array $headers = null, ?array $options = null): ?array
     {
         return $this->request(ITransaction::HTTP_METHOD_DELETE, $url, null, $headers, $options)
-            ->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler)
             ->getDecodedBody();
     }
 
+    /**
+     * @param string $method
+     * @param string $url
+     * @param array|null $body
+     * @param array|null $headers
+     * @param array|null $options
+     * @return IHttpResponse
+     */
     public function request(
         string $method,
         string $url,
@@ -155,12 +179,15 @@ class HttpClient
         $this->lastTransaction = (new Transaction(
             $this->buildRequest(
                 $method,
-                $this->getUrl($url, $options),
+                $url,
                 $body,
                 $headers,
                 $options)));
 
-        return $this->lastTransaction->run()->getResponse();
+        $response = $this->lastTransaction->run()->getResponse();
+        $response->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler);
+        (new ResponseQualityAssurance($this->lastTransaction))->checkCompliance();
+        return $response;
     }
 
     /**
@@ -200,7 +227,9 @@ class HttpClient
             ->setHeaders($headers ?? $this->headers)
             ->setOptions($options ?? $this->options)
             ->setBody($body ?? [])
-            ->setBodyHandler($options['requestBodyHandler'] ??  $this->requestBodyHandler);
+            ->setBodyHandler($options['requestBodyHandler']
+                ?? $this->options['requestBodyHandler']
+                ??  $this->requestBodyHandler);
     }
 
     /**
@@ -214,5 +243,23 @@ class HttpClient
            return $options['baseUrl'] . $url;
        }
        return rtrim($this->baseUrl . $url,"/");
+    }
+
+    /**
+     * @return string
+     */
+    public function getBaseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
+    /**
+     * @param string $baseUrl
+     * @return HttpClient
+     */
+    public function setBaseUrl(string $baseUrl): HttpClient
+    {
+        $this->baseUrl = $baseUrl;
+        return $this;
     }
 }

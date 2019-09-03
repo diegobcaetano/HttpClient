@@ -13,6 +13,8 @@ abstract class CurlBuilder
         CURLOPT_DNS_CACHE_TIMEOUT => true,
         CURLOPT_HTTP_VERSION => true,
         CURLOPT_MAXCONNECTS => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_POSTREDIR => true,
         CURLOPT_TIMEOUT => true,
         CURLOPT_TIMEOUT_MS => true,
         CURLOPT_COOKIE => true,
@@ -30,7 +32,7 @@ abstract class CurlBuilder
     public function prepare()
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->request->getURL());
+        curl_setopt($ch, CURLOPT_URL, $this->request->getUrl());
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);

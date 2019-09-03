@@ -3,12 +3,21 @@
 namespace MadeiraMadeiraBr\HttpClient\Tests;
 
 use MadeiraMadeiraBr\Event\EventObserverFactory;
+use MadeiraMadeiraBr\HttpClient\BodyHandlers\JsonBodyHandler;
+use MadeiraMadeiraBr\HttpClient\EnvConfigInterface;
 use MadeiraMadeiraBr\HttpClient\Http\HttpClient;
+use MadeiraMadeiraBr\HttpClient\Http\HttpRequest;
+use MadeiraMadeiraBr\HttpClient\Http\HttpResponse;
+use MadeiraMadeiraBr\HttpClient\Http\HttpResponseTime;
 use MadeiraMadeiraBr\HttpClient\Http\IHttpResponse;
+use MadeiraMadeiraBr\HttpClient\Http\ITransaction;
+use MadeiraMadeiraBr\HttpClient\Http\Transaction;
 use MadeiraMadeiraBr\HttpClient\Mock\Mock;
 use MadeiraMadeiraBr\HttpClient\Mock\MockHandler;
+use MadeiraMadeiraBr\HttpClient\ResponseQualityAssurance\ResponseQualityAssurance;
 use MadeiraMadeiraBr\HttpClient\Tests\Stub\Observer;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 /**
  * @runTestsInSeparateProcesses
@@ -84,9 +93,7 @@ class HttpClientTest extends TestCase
         $httpClient = new HttpClient();
         $httpClient->get('https://jsonplaceholder.typicode.com/posts/1', null, ['slowRequestTime' => 0.01]);
 
-        $this->assertIsArray(Observer::$eventResult);
-        $this->assertArrayHasKey('request', Observer::$eventResult);
-        $this->assertArrayHasKey('response', Observer::$eventResult);
+        $this->assertInstanceOf(ITransaction::class, Observer::$eventResult);
     }
 
     public function testRequestMockWithFile()
@@ -113,5 +120,80 @@ class HttpClientTest extends TestCase
         $this->assertIsArray($response);
         $this->assertArrayHasKey('test', $response);
         $this->assertEquals('ok', $response['test']);
+    }
+
+    public function testResponseFalsePositiveCompliance()
+    {
+        EventObserverFactory::getInstance()->addObserversToEvent(
+            'HTTP_CLIENT_FALSE_POSITIVE_STATUS_ALERT',
+            [
+                Observer::class
+            ]);
+
+        $response = new HttpResponse(
+            'GET',
+            'fake.com',
+            200,
+            [],
+            [],
+            'Content should be a valid JSON, but it is not',
+            new HttpResponseTime(0,0,0,0,0));
+        $response->setBodyHandler(new JsonBodyHandler());
+
+        $transaction = new Transaction(new HttpRequest());
+        $reflection = new ReflectionClass($transaction);
+        $responseProperty = $reflection->getProperty('response');
+        $responseProperty->setAccessible(true);
+        $responseProperty->setValue($transaction, $response);
+        $responseProperty->setAccessible(false);
+
+        (new ResponseQualityAssurance($transaction))->checkCompliance();
+
+        $this->assertInstanceOf(ITransaction::class, Observer::$eventResult);
+    }
+
+    public function testResponseStatusCompliance()
+    {
+        EventObserverFactory::getInstance()->addObserversToEvent(
+            EnvConfigInterface::UNEXPECTED_RESPONSE_STATUS_ALERT,
+            [
+                Observer::class
+            ]);
+
+        $response = new HttpResponse(
+            'POST',
+            'fake.com',
+            500,
+            [],
+            ['unexpectedStatus' => [400, 500, 502]],
+            'blabla',
+            new HttpResponseTime(0,0,0,0,0));
+        $response->setBodyHandler(new JsonBodyHandler());
+
+        $transaction = new Transaction(new HttpRequest());
+        $reflection = new ReflectionClass($transaction);
+        $responseProperty = $reflection->getProperty('response');
+        $responseProperty->setAccessible(true);
+        $responseProperty->setValue($transaction, $response);
+        $responseProperty->setAccessible(false);
+
+        (new ResponseQualityAssurance($transaction))->checkCompliance();
+
+        $this->assertInstanceOf(ITransaction::class, Observer::$eventResult);
+    }
+
+    public function testCurlErrorCompliance()
+    {
+        EventObserverFactory::getInstance()->addObserversToEvent('HTTP_CLIENT_CURL_ERROR',
+            [
+                Observer::class
+            ]);
+
+        $httpClient = new HttpClient();
+        $httpClient->get('https://jsonplaceholder.typicode.com/posts/1',
+            null,
+            ['curlSettings' => [CURLOPT_TIMEOUT_MS => 10]]);
+
+        $this->assertInstanceOf(ITransaction::class, Observer::$eventResult);
     }
 }
