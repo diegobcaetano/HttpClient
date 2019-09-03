@@ -120,7 +120,7 @@ $client = new HttpClient();
 $client->get('https://foo.bar', array $headers, array $options);
 ```
 
-###Headers
+### Headers
 
 Any header can be set (see all headers: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers).
 The array of the headers is **case insensitive**.
@@ -134,7 +134,7 @@ $headers = [
 new HttpClient($baseUrl, $headers);
 ````
 
-###Curl parameters
+### Curl parameters
 
 We can set the value of some Curl options. The configurable options are:
 
@@ -164,7 +164,7 @@ $options = [
 new HttpClient($baseUrl, $headers, $options);
  ````
  
- ###Body handler
+ ### Body handler
  
  It is possible to set how the body can be handled. 
  
@@ -191,7 +191,7 @@ new HttpClient(
     $customerBodyHandlerForResponse);
  ````
 
-###General Settings
+### General Settings
 
 You can configure these properties too:
 

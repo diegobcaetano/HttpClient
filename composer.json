@@ -1,7 +1,7 @@
 {
     "name": "madeiramadeirabr/http-client",
     "description": "A package to consume Rest APIs with multi-curl and mock return",
-    "version": "1.0.31",
+    "version": "1.0.32",
     "type": "library",
     "authors": [
         {
