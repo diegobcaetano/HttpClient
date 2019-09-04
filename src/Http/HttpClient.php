@@ -7,7 +7,7 @@ use MadeiraMadeiraBr\HttpClient\BodyHandlers\JsonBodyHandler;
 use MadeiraMadeiraBr\HttpClient\Mock\MockHandler;
 use MadeiraMadeiraBr\HttpClient\ResponseQualityAssurance\ResponseQualityAssurance;
 
-class HttpClient
+class HttpClient implements IHttpClient
 {
     /**
      * @var string
@@ -66,16 +66,20 @@ class HttpClient
 
     /**
      * @param array $headers
-     * @return HttpClient
+     * @return IHttpClient
      */
-    public function setHeaders(array $headers): HttpClient
+    public function setHeaders(array $headers): IHttpClient
     {
         $headers = array_change_key_case($headers, CASE_LOWER);
         $this->headers = $headers;
         return $this;
     }
 
-    public function pushHeader(array $header)
+    /**
+     * @param array $header
+     * @return IHttpClient
+     */
+    public function pushHeader(array $header): IHttpClient
     {
         $header = array_change_key_case($header, CASE_LOWER);
         $this->headers = array_replace($this->headers, $header);
@@ -84,15 +88,19 @@ class HttpClient
 
     /**
      * @param array $options
-     * @return HttpClient
+     * @return IHttpClient
      */
-    public function setOptions(array $options): HttpClient
+    public function setOptions(array $options): IHttpClient
     {
         $this->options = $options;
         return $this;
     }
 
-    public function pushOption(array $option): HttpClient
+    /**
+     * @param array $option
+     * @return IHttpClient
+     */
+    public function pushOption(array $option): IHttpClient
     {
         $curlSettings = $this->options['curlSettings'] ?? [];
         if(isset($this->options['curlSettings'])
@@ -237,7 +245,7 @@ class HttpClient
      * @param array|null $options
      * @return string
      */
-    private function getUrl(string $url, ?array $options)
+    public function getUrl(string $url, ?array $options): string
     {
        if(isset($options['baseUrl'])) {
            return $options['baseUrl'] . $url;
@@ -255,9 +263,9 @@ class HttpClient
 
     /**
      * @param string $baseUrl
-     * @return HttpClient
+     * @return IHttpClient
      */
-    public function setBaseUrl(string $baseUrl): HttpClient
+    public function setBaseUrl(string $baseUrl): IHttpClient
     {
         $this->baseUrl = $baseUrl;
         return $this;

@@ -5,6 +5,7 @@ namespace MadeiraMadeiraBr\HttpClient\Tests;
 use MadeiraMadeiraBr\Event\EventObserverFactory;
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\JsonBodyHandler;
 use MadeiraMadeiraBr\HttpClient\EnvConfigInterface;
+use MadeiraMadeiraBr\HttpClient\Http\CacheProxyHttpClient;
 use MadeiraMadeiraBr\HttpClient\Http\HttpClient;
 use MadeiraMadeiraBr\HttpClient\Http\HttpRequest;
 use MadeiraMadeiraBr\HttpClient\Http\HttpResponse;
@@ -195,5 +196,13 @@ class HttpClientTest extends TestCase
             ['curlSettings' => [CURLOPT_TIMEOUT_MS => 10]]);
 
         $this->assertInstanceOf(ITransaction::class, Observer::$eventResult);
+    }
+
+    public function testCacheReturn()
+    {
+        $httpClient = new HttpClient();
+        $cacheClient = new CacheProxyHttpClient($httpClient);
+        $cacheClient->get('https://jsonplaceholder.typicode.com/posts/1');
+        $cacheClient->get('https://jsonplaceholder.typicode.com/posts/1');
     }
 }
