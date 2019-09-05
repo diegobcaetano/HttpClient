@@ -7,6 +7,11 @@ class CacheProxyHttpClient implements IHttpClient
     /**
      * @var array
      */
+    const SUCCESS_STATUS = [200, 201];
+
+    /**
+     * @var array
+     */
     private $cache = [];
 
     /**
@@ -80,7 +85,8 @@ class CacheProxyHttpClient implements IHttpClient
      */
     public function post(string $url, array $body, ?array $headers = null, ?array $options = null): ?array
     {
-        return $this->httpClient->post($url, $body, $headers, $options);
+        return $this->request(ITransaction::HTTP_METHOD_POST, $url, $body, $headers, $options)
+            ->getDecodedBody();
     }
 
     /**
@@ -92,7 +98,8 @@ class CacheProxyHttpClient implements IHttpClient
      */
     public function put(string $url, array $body, ?array $headers = null, ?array $options = null): ?array
     {
-        return $this->httpClient->put($url, $body, $headers, $options);
+        return $this->request(ITransaction::HTTP_METHOD_PUT, $url, $body, $headers, $options)
+            ->getDecodedBody();
     }
 
     /**
@@ -103,7 +110,8 @@ class CacheProxyHttpClient implements IHttpClient
      */
     public function delete(string $url, ?array $headers = null, ?array $options = null): ?array
     {
-        return $this->httpClient->delete($url, $headers, $options);
+        return $this->request(ITransaction::HTTP_METHOD_DELETE, $url, null, $headers, $options)
+            ->getDecodedBody();
     }
 
     /**
@@ -126,7 +134,7 @@ class CacheProxyHttpClient implements IHttpClient
             return $this->cache[$requestHash];
         }
         $response = $this->httpClient->request($method, $url, $body, $headers, $options);
-        if($response->getStatus() == 200) {
+        if(in_array($response->getStatus(), self::SUCCESS_STATUS)  ) {
             $this->cacheResponse($requestHash);
         }
         return $response;
