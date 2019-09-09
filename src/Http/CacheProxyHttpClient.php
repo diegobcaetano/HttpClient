@@ -135,7 +135,7 @@ class CacheProxyHttpClient implements IHttpClient
         }
         $response = $this->httpClient->request($method, $url, $body, $headers, $options);
         if(in_array($response->getStatus(), self::SUCCESS_STATUS)  ) {
-            $this->cacheResponse($requestHash);
+            $this->cacheResponse($requestHash, $response);
         }
         return $response;
     }
@@ -178,9 +178,9 @@ class CacheProxyHttpClient implements IHttpClient
         return $this->httpClient->getUrl($url, $options);
     }
 
-    private function cacheResponse(string $hash): bool
+    private function cacheResponse(string $hash, IHttpResponse $response): bool
     {
-        $this->cache[$hash] = $this->getLastTransaction()->getResponse();
+        $this->cache[$hash] = $response;
         return true;
     }
 
