@@ -5,7 +5,6 @@ namespace MadeiraMadeiraBr\HttpClient\Tests;
 use MadeiraMadeiraBr\Event\EventObserverFactory;
 use MadeiraMadeiraBr\HttpClient\BodyHandlers\JsonBodyHandler;
 use MadeiraMadeiraBr\HttpClient\EnvConfigInterface;
-use MadeiraMadeiraBr\HttpClient\Http\CacheProxyHttpClient;
 use MadeiraMadeiraBr\HttpClient\Http\HttpClient;
 use MadeiraMadeiraBr\HttpClient\Http\HttpRequest;
 use MadeiraMadeiraBr\HttpClient\Http\HttpResponse;
@@ -185,7 +184,7 @@ class HttpClientTest extends TestCase
 
     public function testCurlErrorCompliance()
     {
-        EventObserverFactory::getInstance()->addObserversToEvent('HTTP_CLIENT_CURL_ERROR',
+        EventObserverFactory::getInstance()->addObserversToEvent(EnvConfigInterface::CURL_ERROR_ALERT,
             [
                 Observer::class
             ]);
@@ -198,11 +197,10 @@ class HttpClientTest extends TestCase
         $this->assertInstanceOf(ITransaction::class, Observer::$eventResult);
     }
 
-    public function testCacheReturn()
-    {
-        $httpClient = new HttpClient();
-        $cacheClient = new CacheProxyHttpClient($httpClient);
-        $cacheClient->get('https://jsonplaceholder.typicode.com/posts/1');
-        $cacheClient->get('https://jsonplaceholder.typicode.com/posts/1');
-    }
+//    public function testCacheReturn()
+//    {
+//        $httpClient = new HttpClient();
+//        $cacheClient = new CacheProxyHttpClient($httpClient);
+//        $cacheClient->get('https://jsonplaceholder.typicode.com/posts/1');
+//    }
 }

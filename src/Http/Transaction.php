@@ -7,6 +7,11 @@ use MadeiraMadeiraBr\HttpClient\Curl\CurlExtractor;
 class Transaction implements ITransaction
 {
     /**
+     * @var string
+     */
+    private $serviceName;
+
+    /**
      * @var IHttpRequest
      */
     private $request;
@@ -19,6 +24,17 @@ class Transaction implements ITransaction
     public function __construct(IHttpRequest $request)
     {
         $this->request = $request;
+    }
+
+    public function setServiceName(?string $serviceName): ITransaction
+    {
+        $this->serviceName = $serviceName;
+        return $this;
+    }
+
+    public function getServiceName(): ?string
+    {
+        return $this->serviceName;
     }
 
     public function run(): ITransaction

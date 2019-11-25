@@ -5,6 +5,17 @@ namespace MadeiraMadeiraBr\HttpClient\Http;
 interface IHttpClient
 {
     /**
+     * @param string $serviceName
+     * @return IHttpClient
+     */
+    public function setServiceName(?string $serviceName): IHttpClient;
+
+    /**
+     * @return string
+     */
+    public function getServiceName(): ?string;
+
+    /**
      * @param array $headers
      * @return IHttpClient
      */

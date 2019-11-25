@@ -29,6 +29,23 @@ class CacheProxyHttpClient implements IHttpClient
     }
 
     /**
+     * @param string $serviceName
+     * @return IHttpClient
+     */
+    public function setServiceName(?string $serviceName): IHttpClient
+    {
+        return $this->httpClient->setServiceName($serviceName);
+    }
+
+    /**
+     * @return string
+     */
+    public function getServiceName(): ?string
+    {
+        return $this->httpClient->getServiceName();
+    }
+
+    /**
      * @param array $headers
      * @return IHttpClient
      */

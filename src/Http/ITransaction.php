@@ -14,4 +14,6 @@ interface ITransaction extends Printable
     public function run(): ITransaction;
     public function getResponse(): IHttpResponse;
     public function getRequest(): IHttpRequest;
+    public function setServiceName(?string $serviceName): ITransaction;
+    public function getServiceName(): ?string;
 }

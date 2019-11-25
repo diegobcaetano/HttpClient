@@ -12,6 +12,11 @@ class HttpClient implements IHttpClient
     /**
      * @var string
      */
+    private $serviceName;
+
+    /**
+     * @var string
+     */
     private $baseUrl;
 
     /**
@@ -62,6 +67,24 @@ class HttpClient implements IHttpClient
         $this->options = $options ?? $this->options;
         $this->requestBodyHandler = $requestBodyHandler ?? new JsonBodyHandler();
         $this->responseBodyHandler = $responseBodyHandler ?? new JsonBodyHandler();
+    }
+
+    /**
+     * @param string $serviceName
+     * @return IHttpClient
+     */
+    public function setServiceName(?string $serviceName): IHttpClient
+    {
+        $this->serviceName = $serviceName;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getServiceName(): ?string
+    {
+        return $this->serviceName;
     }
 
     /**
@@ -184,13 +207,16 @@ class HttpClient implements IHttpClient
             return $mock->get();
         }
 
-        $this->lastTransaction = (new Transaction(
+        $transaction = new Transaction(
             $this->buildRequest(
                 $method,
                 $url,
                 $body,
                 $headers,
-                $options)));
+                $options));
+
+        $transaction->setServiceName($this->serviceName);
+        $this->lastTransaction = ($transaction);
 
         $response = $this->lastTransaction->run()->getResponse();
         $response->setBodyHandler($options['responseBodyHandler'] ?? $this->responseBodyHandler);
