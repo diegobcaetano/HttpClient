@@ -36,6 +36,7 @@ abstract class CurlBuilder
         curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION,true);
 
         $curlOptions = $this->request->getOptions()['curlSettings'] ?? [];
         foreach($curlOptions as $key => $option) {
